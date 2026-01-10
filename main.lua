@@ -55,21 +55,43 @@ local function hasTool()
 	return false
 end
 
-local function teleGuiado()
+local function waitForBase()
+	local base
+	repeat
+		base = workspace:FindFirstChild("Base de HaroldEs08")
+		task.wait(0.1)
+	until base
+	return base
+end
+
+local function teleportToBase()
 	local char = player.Character or player.CharacterAdded:Wait()
 	local hrp = char:WaitForChild("HumanoidRootPart")
-	local base = workspace:FindFirstChild("Base de HaroldEs08")
+	local base = waitForBase()
 
-	if base then
+	if base:IsA("Model") then
 		hrp.CFrame = base:GetModelCFrame() + Vector3.new(0,5,0)
-		if hasTool() then
-			task.wait(0.5)
-			player:Kick("You stole a Pet!")
-		end
+	else
+		hrp.CFrame = base.CFrame + Vector3.new(0,5,0)
 	end
 end
 
-teleBtn.MouseButton1Click:Connect(teleGuiado)
+teleBtn.MouseButton1Click:Connect(function()
+	teleportToBase()
+	task.wait(0.3)
+	if hasTool() then
+		player:Kick("You Stole a Pet!")
+	end
+end)
+
+player.CharacterAdded:Connect(function(char)
+	char.ChildAdded:Connect(function(obj)
+		if obj:IsA("Tool") then
+			task.wait(0.3)
+			player:Kick("You Stole a Pet!")
+		end
+	end)
+end)
 
 closeBtn.MouseButton1Click:Connect(function()
 	frame.Visible = false

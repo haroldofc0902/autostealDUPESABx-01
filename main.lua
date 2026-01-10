@@ -7,7 +7,7 @@ local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
 local humanoid = char:WaitForChild("Humanoid")
 
--- Guardar la posición donde apareces al unirte (tu base real)
+-- Guardar la posición donde apareces al entrar (tu base)
 local spawnCFrame = hrp.CFrame
 
 -- Estados
@@ -17,7 +17,7 @@ local wallhackEnabled = false
 
 -- Velocidades
 local normalSpeed = 16
-local fastSpeed = 28
+local fastSpeed = 35
 
 -- GUI
 local gui = Instance.new("ScreenGui")
@@ -27,8 +27,8 @@ gui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
 frame.Parent = gui
-frame.Size = UDim2.fromScale(0.25, 0.35)
-frame.Position = UDim2.fromScale(0.375, 0.35)
+frame.Size = UDim2.fromScale(0.30, 0.35) -- más ancho
+frame.Position = UDim2.fromScale(0.35, 0.35)
 frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
 frame.BorderSizePixel = 0
 
@@ -36,11 +36,23 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0,12)
 corner.Parent = frame
 
+-- Título
+local title = Instance.new("TextLabel")
+title.Parent = frame
+title.Size = UDim2.fromScale(1, 0.12)
+title.Position = UDim2.fromScale(0, 0)
+title.BackgroundTransparency = 1
+title.Text = "HAROLD PRIV"
+title.TextColor3 = Color3.fromRGB(255, 0, 0)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.TextStrokeTransparency = 0
+
 -- TELEGUIADO
 local teleBtn = Instance.new("TextButton")
 teleBtn.Parent = frame
-teleBtn.Size = UDim2.fromScale(0.9, 0.18)
-teleBtn.Position = UDim2.fromScale(0.05, 0.05)
+teleBtn.Size = UDim2.fromScale(0.9, 0.15)
+teleBtn.Position = UDim2.fromScale(0.05, 0.15)
 teleBtn.Text = "TELEGUIADO"
 teleBtn.TextColor3 = Color3.new(0,0,0)
 teleBtn.BackgroundColor3 = Color3.fromRGB(220,220,220)
@@ -50,8 +62,8 @@ Instance.new("UICorner", teleBtn).CornerRadius = UDim.new(0,8)
 -- WALLHACK
 local wallBtn = Instance.new("TextButton")
 wallBtn.Parent = frame
-wallBtn.Size = UDim2.fromScale(0.9, 0.18)
-wallBtn.Position = UDim2.fromScale(0.05, 0.27)
+wallBtn.Size = UDim2.fromScale(0.9, 0.15)
+wallBtn.Position = UDim2.fromScale(0.05, 0.37)
 wallBtn.Text = "WALLHACK: OFF"
 wallBtn.TextColor3 = Color3.new(0,0,0)
 wallBtn.BackgroundColor3 = Color3.fromRGB(220,220,220)
@@ -61,8 +73,8 @@ Instance.new("UICorner", wallBtn).CornerRadius = UDim.new(0,8)
 -- SPEED
 local speedBtn = Instance.new("TextButton")
 speedBtn.Parent = frame
-speedBtn.Size = UDim2.fromScale(0.9, 0.18)
-speedBtn.Position = UDim2.fromScale(0.05, 0.49)
+speedBtn.Size = UDim2.fromScale(0.9, 0.15)
+speedBtn.Position = UDim2.fromScale(0.05, 0.59)
 speedBtn.Text = "SPEED: OFF"
 speedBtn.TextColor3 = Color3.new(0,0,0)
 speedBtn.BackgroundColor3 = Color3.fromRGB(220,220,220)
@@ -72,15 +84,15 @@ Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0,8)
 -- AUTO KICK
 local kickBtn = Instance.new("TextButton")
 kickBtn.Parent = frame
-kickBtn.Size = UDim2.fromScale(0.9, 0.18)
-kickBtn.Position = UDim2.fromScale(0.05, 0.71)
+kickBtn.Size = UDim2.fromScale(0.9, 0.15)
+kickBtn.Position = UDim2.fromScale(0.05, 0.81)
 kickBtn.Text = "AUTO KICK: OFF"
 kickBtn.TextColor3 = Color3.new(0,0,0)
 kickBtn.BackgroundColor3 = Color3.fromRGB(220,220,220)
 kickBtn.BorderSizePixel = 0
 Instance.new("UICorner", kickBtn).CornerRadius = UDim.new(0,8)
 
--- Función noclip
+-- Función Noclip
 local noclipConn
 local function setNoclip(state)
 	if state then
@@ -178,19 +190,21 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- Botón circular para abrir/cerrar menú
+-- Botón circular flotante para abrir/cerrar menú
 local toggleBtn = Instance.new("ImageButton")
 toggleBtn.Parent = gui
 toggleBtn.Size = UDim2.fromScale(0.07, 0.07)
 toggleBtn.Position = UDim2.fromScale(0.02, 0.45)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 toggleBtn.BorderSizePixel = 0
+toggleBtn.AutoButtonColor = true
 
 local toggleCorner = Instance.new("UICorner")
 toggleCorner.CornerRadius = UDim.new(1,0)
 toggleCorner.Parent = toggleBtn
 
 local menuOpen = true
+frame.Visible = true
 
 toggleBtn.MouseButton1Click:Connect(function()
 	menuOpen = not menuOpen

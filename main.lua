@@ -1,101 +1,108 @@
+		-- DRAGON HUB (LocalScript)
+
 local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
 local humanoid = char:WaitForChild("Humanoid")
 
--- Guardar la posición donde apareces al entrar (tu base)
+-- Guardar el lugar donde apareces
 local spawnCFrame = hrp.CFrame
 
--- Estados
-local autoKickEnabled = false
-local speedEnabled = false
-local wallhackEnabled = false
+player.CharacterAdded:Connect(function(c)
+	char = c
+	hrp = c:WaitForChild("HumanoidRootPart")
+	humanoid = c:WaitForChild("Humanoid")
+	spawnCFrame = hrp.CFrame
+end)
 
--- Velocidades
+-- Estados
+local autoKick = false
+local speedOn = false
+local noclipOn = false
+
 local normalSpeed = 16
 local fastSpeed = 35
 
 -- GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "HaroldHub"
+gui.Name = "DragonHub"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
+-- FRAME PRINCIPAL
 local frame = Instance.new("Frame")
 frame.Parent = gui
-frame.Size = UDim2.fromScale(0.30, 0.35) -- más ancho
-frame.Position = UDim2.fromScale(0.35, 0.35)
+frame.Size = UDim2.fromScale(0.32,0.4)
+frame.Position = UDim2.fromScale(0.34,0.3)
 frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
 frame.BorderSizePixel = 0
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,14)
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0,12)
-corner.Parent = frame
-
--- Título
+-- TITULO
 local title = Instance.new("TextLabel")
 title.Parent = frame
-title.Size = UDim2.fromScale(1, 0.12)
-title.Position = UDim2.fromScale(0, 0)
+title.Size = UDim2.fromScale(1,0.12)
 title.BackgroundTransparency = 1
-title.Text = "HAROLD PRIV"
-title.TextColor3 = Color3.fromRGB(255, 0, 0)
+title.Text = "DRAGON HUB"
+title.TextColor3 = Color3.fromRGB(255,0,0)
+title.Font = Enum.Font.GothamBlack -- fuente más gorda
 title.TextScaled = true
-title.Font = Enum.Font.GothamBold
 title.TextStrokeTransparency = 0
+title.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+
+-- FUNCIÓN PARA CREAR BOTONES
+local function makeButton(text,y)
+	local b = Instance.new("TextButton")
+	b.Parent = frame
+	b.Size = UDim2.fromScale(0.9,0.14)
+	b.Position = UDim2.fromScale(0.05,y)
+	b.Text = text
+	b.TextColor3 = Color3.new(0,0,0)
+	b.BackgroundColor3 = Color3.fromRGB(220,220,220)
+	b.BorderSizePixel = 0
+	b.Font = Enum.Font.GothamBold
+	b.TextScaled = true
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
+	return b
+end
+
+-- BOTONES
+local teleBtn  = makeButton("TELEGUIADO",0.15)
+local wallBtn  = makeButton("WALLHACK : OFF",0.33)
+local speedBtn = makeButton("SPEED : OFF",0.51)
+local kickBtn  = makeButton("AUTO KICK : OFF",0.69)
 
 -- TELEGUIADO
-local teleBtn = Instance.new("TextButton")
-teleBtn.Parent = frame
-teleBtn.Size = UDim2.fromScale(0.9, 0.15)
-teleBtn.Position = UDim2.fromScale(0.05, 0.15)
-teleBtn.Text = "TELEGUIADO"
-teleBtn.TextColor3 = Color3.new(0,0,0)
-teleBtn.BackgroundColor3 = Color3.fromRGB(220,220,220)
-teleBtn.BorderSizePixel = 0
-Instance.new("UICorner", teleBtn).CornerRadius = UDim.new(0,8)
-
--- WALLHACK
-local wallBtn = Instance.new("TextButton")
-wallBtn.Parent = frame
-wallBtn.Size = UDim2.fromScale(0.9, 0.15)
-wallBtn.Position = UDim2.fromScale(0.05, 0.37)
-wallBtn.Text = "WALLHACK: OFF"
-wallBtn.TextColor3 = Color3.new(0,0,0)
-wallBtn.BackgroundColor3 = Color3.fromRGB(220,220,220)
-wallBtn.BorderSizePixel = 0
-Instance.new("UICorner", wallBtn).CornerRadius = UDim.new(0,8)
+teleBtn.MouseButton1Click:Connect(function()
+	hrp.CFrame = spawnCFrame
+	if autoKick then
+		task.wait(0.4)
+		player:Kick("You Stole a Pet!")
+	end
+end)
 
 -- SPEED
-local speedBtn = Instance.new("TextButton")
-speedBtn.Parent = frame
-speedBtn.Size = UDim2.fromScale(0.9, 0.15)
-speedBtn.Position = UDim2.fromScale(0.05, 0.59)
-speedBtn.Text = "SPEED: OFF"
-speedBtn.TextColor3 = Color3.new(0,0,0)
-speedBtn.BackgroundColor3 = Color3.fromRGB(220,220,220)
-speedBtn.BorderSizePixel = 0
-Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0,8)
+speedBtn.MouseButton1Click:Connect(function()
+	speedOn = not speedOn
+	if speedOn then
+		humanoid.WalkSpeed = fastSpeed
+		speedBtn.Text = "SPEED : ON"
+	else
+		humanoid.WalkSpeed = normalSpeed
+		speedBtn.Text = "SPEED : OFF"
+	end
+end)
 
--- AUTO KICK
-local kickBtn = Instance.new("TextButton")
-kickBtn.Parent = frame
-kickBtn.Size = UDim2.fromScale(0.9, 0.15)
-kickBtn.Position = UDim2.fromScale(0.05, 0.81)
-kickBtn.Text = "AUTO KICK: OFF"
-kickBtn.TextColor3 = Color3.new(0,0,0)
-kickBtn.BackgroundColor3 = Color3.fromRGB(220,220,220)
-kickBtn.BorderSizePixel = 0
-Instance.new("UICorner", kickBtn).CornerRadius = UDim.new(0,8)
-
--- Función Noclip
+-- WALLHACK (Noclip)
 local noclipConn
-local function setNoclip(state)
-	if state then
+wallBtn.MouseButton1Click:Connect(function()
+	noclipOn = not noclipOn
+	if noclipOn then
+		wallBtn.Text = "WALLHACK : ON"
 		noclipConn = RunService.Stepped:Connect(function()
 			for _,v in pairs(char:GetDescendants()) do
 				if v:IsA("BasePart") then
@@ -104,6 +111,7 @@ local function setNoclip(state)
 			end
 		end)
 	else
+		wallBtn.Text = "WALLHACK : OFF"
 		if noclipConn then
 			noclipConn:Disconnect()
 			noclipConn = nil
@@ -114,130 +122,82 @@ local function setNoclip(state)
 			end
 		end
 	end
-end
-
--- TELEGUIADO
-teleBtn.MouseButton1Click:Connect(function()
-	hrp.CFrame = spawnCFrame
-	if autoKickEnabled then
-		task.wait(0.3)
-		player:Kick("You Stole a Pet!")
-	end
-end)
-
--- WALLHACK
-wallBtn.MouseButton1Click:Connect(function()
-	wallhackEnabled = not wallhackEnabled
-	if wallhackEnabled then
-		wallBtn.Text = "WALLHACK: ON"
-		setNoclip(true)
-	else
-		wallBtn.Text = "WALLHACK: OFF"
-		setNoclip(false)
-	end
-end)
-
--- SPEED
-speedBtn.MouseButton1Click:Connect(function()
-	speedEnabled = not speedEnabled
-	if speedEnabled then
-		speedBtn.Text = "SPEED: ON"
-		humanoid.WalkSpeed = fastSpeed
-	else
-		speedBtn.Text = "SPEED: OFF"
-		humanoid.WalkSpeed = normalSpeed
-	end
 end)
 
 -- AUTO KICK
 kickBtn.MouseButton1Click:Connect(function()
-	autoKickEnabled = not autoKickEnabled
-	if autoKickEnabled then
-		kickBtn.Text = "AUTO KICK: ON"
+	autoKick = not autoKick
+	if autoKick then
+		kickBtn.Text = "AUTO KICK : ON"
 	else
-		kickBtn.Text = "AUTO KICK: OFF"
+		kickBtn.Text = "AUTO KICK : OFF"
 	end
 end)
 
--- Drag del menú
-local dragging = false
-local dragStart
-local startPos
-
-frame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+-- DRAG DEL MENÚ
+local dragging, dragStart, startPos
+frame.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
 		dragging = true
-		dragStart = input.Position
+		dragStart = i.Position
 		startPos = frame.Position
 	end
 end)
 
-frame.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+frame.InputEnded:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
 		dragging = false
 	end
 end)
 
-UIS.InputChanged:Connect(function(input)
-	if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-		local delta = input.Position - dragStart
+UIS.InputChanged:Connect(function(i)
+	if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+		local delta = i.Position - dragStart
 		frame.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
+			startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y
 		)
 	end
 end)
 
--- Botón circular flotante para abrir/cerrar menú
+-- BOTÓN FLOTANTE CIRCULAR
 local toggleBtn = Instance.new("ImageButton")
 toggleBtn.Parent = gui
-toggleBtn.Size = UDim2.fromScale(0.07, 0.07)
-toggleBtn.Position = UDim2.fromScale(0.02, 0.45)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
+toggleBtn.Size = UDim2.fromScale(0.08,0.08)
+toggleBtn.Position = UDim2.fromScale(0.03,0.45)
+toggleBtn.Image = "rbxassetid://73387282416078"
+toggleBtn.BackgroundTransparency = 1
 toggleBtn.BorderSizePixel = 0
-toggleBtn.AutoButtonColor = true
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1,0)
 
-local toggleCorner = Instance.new("UICorner")
-toggleCorner.CornerRadius = UDim.new(1,0)
-toggleCorner.Parent = toggleBtn
-
-local menuOpen = true
-frame.Visible = true
-
+local open = true
 toggleBtn.MouseButton1Click:Connect(function()
-	menuOpen = not menuOpen
-	frame.Visible = menuOpen
+	open = not open
+	frame.Visible = open
 end)
 
--- Drag del círculo
-local draggingCircle = false
-local dragStartCircle
-local startPosCircle
-
-toggleBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		draggingCircle = true
-		dragStartCircle = input.Position
-		startPosCircle = toggleBtn.Position
+-- DRAG DEL CÍRCULO
+local draggingC, dragStartC, startPosC
+toggleBtn.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		draggingC = true
+		dragStartC = i.Position
+		startPosC = toggleBtn.Position
 	end
 end)
 
-toggleBtn.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		draggingCircle = false
+toggleBtn.InputEnded:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		draggingC = false
 	end
 end)
 
-UIS.InputChanged:Connect(function(input)
-	if draggingCircle and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-		local delta = input.Position - dragStartCircle
+UIS.InputChanged:Connect(function(i)
+	if draggingC and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+		local delta = i.Position - dragStartC
 		toggleBtn.Position = UDim2.new(
-			startPosCircle.X.Scale,
-			startPosCircle.X.Offset + delta.X,
-			startPosCircle.Y.Scale,
-			startPosCircle.Y.Offset + delta.Y
+			startPosC.X.Scale, startPosC.X.Offset + delta.X,
+			startPosC.Y.Scale, startPosC.Y.Offset + delta.Y
 		)
 	end
 end)

@@ -59,26 +59,42 @@ closeBtn.Parent = frame
 -- Variables
 local autoKickEnabled = false
 
--- Función Teleguiado (teleporta al Spawn)
+-- Función para encontrar el checkpoint verde automáticamente
+local function findCheckpoint()
+    local basesFolder = workspace:FindFirstChild("Bases")
+    if not basesFolder then return nil end
+
+    local playerBase = basesFolder:FindFirstChild(player.Name)
+    if not playerBase then return nil end
+
+    for _, obj in pairs(playerBase:GetDescendants()) do
+        if obj:IsA("Part") and obj.Color == Color3.fromRGB(0,255,0) then
+            return obj
+        end
+    end
+
+    return nil
+end
+
+-- Función Teleguiado
 local function TeleGuiado()
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
 
-    local spawnPoint = workspace:FindFirstChild("SpawnLocation")
+    local checkpoint = findCheckpoint()
+    if checkpoint then
+        hrp.CFrame = checkpoint.CFrame + Vector3.new(0,5,0)
 
-    if spawnPoint then
-        hrp.CFrame = spawnPoint.CFrame + Vector3.new(0,5,0)
-
-        -- Si el Auto Kick está activado, te saca del juego
         if autoKickEnabled then
             task.wait(1)
             player:Kick("You stole a pet!")
         end
     else
-        warn("No se encontró el SpawnLocation")
+        warn("No se encontró ningún checkpoint verde en tu base")
     end
 end
 
+-- Conectar botones
 teleBtn.MouseButton1Click:Connect(function()
     TeleGuiado()
 end)

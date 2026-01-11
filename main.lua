@@ -1,9 +1,8 @@
---// CAT HUB - LocalScript (ULTRA COMPLETO)
+--// CAT HUB - LocalScript (FIX DRAG + BIG TEXT)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
@@ -34,16 +33,14 @@ local fastSpeed = 35
 --------------------------------------------------
 -- GUI
 --------------------------------------------------
-local gui = Instance.new("ScreenGui")
-gui.Name = "CatHub"
+local gui = Instance.new("ScreenGui", player.PlayerGui)
 gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
 
 --------------------------------------------------
 -- CLICK SOUND
 --------------------------------------------------
 local clickSound = Instance.new("Sound", gui)
-clickSound.SoundId = "rbxassetid://12221967" -- UI click
+clickSound.SoundId = "rbxassetid://12221967"
 clickSound.Volume = 1
 
 local function click()
@@ -54,58 +51,59 @@ end
 -- MAIN FRAME
 --------------------------------------------------
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.fromScale(0.34,0.55)
-frame.Position = UDim2.fromScale(0.33,0.25)
+frame.Size = UDim2.fromScale(0.36,0.6)
+frame.Position = UDim2.fromScale(0.32,0.2)
 frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 frame.BorderSizePixel = 0
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,16)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,18)
+frame.Active = true
 
 --------------------------------------------------
--- TITLE
+-- TITLE (DRAG AREA)
 --------------------------------------------------
 local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.fromScale(1,0.1)
+title.Size = UDim2.fromScale(1,0.12)
 title.BackgroundTransparency = 1
 title.Text = "CAT HUB"
 title.Font = Enum.Font.GothamBlack
-title.TextScaled = true
 title.TextColor3 = Color3.fromRGB(255,90,90)
+title.TextScaled = true
+title.Active = true
 
 --------------------------------------------------
--- BUTTON CREATOR
+-- BUTTON CREATOR (BIG TEXT)
 --------------------------------------------------
-local function makeButton(text, sizeY, posY)
+local function makeButton(text, posY, width)
 	local b = Instance.new("TextButton", frame)
-	b.Size = UDim2.fromScale(0.9,sizeY)
+	b.Size = UDim2.fromScale(width or 0.9,0.085)
 	b.Position = UDim2.fromScale(0.05,posY)
 	b.Text = text
 	b.Font = Enum.Font.GothamBold
 	b.TextScaled = true
+	b.TextSize = 24
 	b.TextColor3 = Color3.new(1,1,1)
 	b.BackgroundColor3 = Color3.fromRGB(40,40,40)
 	b.BorderSizePixel = 0
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0,12)
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,14)
 	return b
 end
 
 --------------------------------------------------
 -- BUTTONS (ORDER)
 --------------------------------------------------
-local teleBtn  = makeButton("TELEGUIADO",0.08,0.12)
-local speedBtn = makeButton("SPEED : OFF",0.08,0.21)
-local kickBtn  = makeButton("AUTO KICK : OFF",0.08,0.30)
+local teleBtn  = makeButton("TELEGUIADO",0.14)
+local speedBtn = makeButton("SPEED : OFF",0.24)
+local kickBtn  = makeButton("AUTO KICK : OFF",0.34)
 
--- ESP + X-RAY
-local espBtn = makeButton("ESP : OFF",0.08,0.39)
-espBtn.Size = UDim2.fromScale(0.43,0.08)
-espBtn.Position = UDim2.fromScale(0.05,0.39)
+local espBtn = makeButton("ESP : OFF",0.44,0.43)
+espBtn.Position = UDim2.fromScale(0.05,0.44)
 
-local xrayBtn = makeButton("X-RAY : OFF",0.08,0.39)
-xrayBtn.Size = UDim2.fromScale(0.43,0.08)
-xrayBtn.Position = UDim2.fromScale(0.52,0.39)
+local xrayBtn = makeButton("X-RAY : OFF",0.44,0.43)
+xrayBtn.Position = UDim2.fromScale(0.52,0.44)
 
--- AUTO GRAB
-local grabBtn = makeButton("AUTO GRAB : OFF",0.08,0.50)
+local grabBtn = makeButton("AUTO GRAB : OFF",0.56)
+
+local closeBtn = makeButton("CLOSE",0.68)
 
 --------------------------------------------------
 -- TELEGUIADO
@@ -140,6 +138,16 @@ kickBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
+-- CLOSE MENU
+--------------------------------------------------
+local open = true
+closeBtn.MouseButton1Click:Connect(function()
+	click()
+	open = false
+	frame.Visible = false
+end)
+
+--------------------------------------------------
 -- ESP (YOU INCLUDED)
 --------------------------------------------------
 local espObjects = {}
@@ -155,7 +163,7 @@ local function createESP(plr,color)
 	if not plr.Character or not plr.Character:FindFirstChild("Head") then return end
 	local bb = Instance.new("BillboardGui", gui)
 	bb.Adornee = plr.Character.Head
-	bb.Size = UDim2.new(0,220,0,40)
+	bb.Size = UDim2.new(0,260,0,45)
 	bb.AlwaysOnTop = true
 
 	local t = Instance.new("TextLabel", bb)
@@ -187,7 +195,7 @@ espBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- X-RAY (NO FLOOR)
+-- X-RAY
 --------------------------------------------------
 xrayBtn.MouseButton1Click:Connect(function()
 	click()
@@ -204,7 +212,7 @@ xrayBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- AUTO GRAB (ROBAR / STEAL)
+-- AUTO GRAB
 --------------------------------------------------
 grabBtn.MouseButton1Click:Connect(function()
 	click()
@@ -216,8 +224,8 @@ RunService.Heartbeat:Connect(function()
 	if grabOn then
 		for _,v in pairs(workspace:GetDescendants()) do
 			if v:IsA("ProximityPrompt") then
-				local t = string.lower(v.ActionText or "")
-				if t:find("robar") or t:find("steal") then
+				local txt = string.lower(v.ActionText or "")
+				if txt:find("robar") or txt:find("steal") then
 					pcall(function()
 						v.HoldDuration = 0
 						v:InputHoldBegin()
@@ -229,11 +237,12 @@ RunService.Heartbeat:Connect(function()
 end)
 
 --------------------------------------------------
--- DRAG MENU
+-- DRAG MENU (FIXED)
 --------------------------------------------------
 local dragging, dragStart, startPos
-frame.InputBegan:Connect(function(i)
-	if i.UserInputType == Enum.UserInputType.MouseButton1 then
+
+title.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
 		dragging = true
 		dragStart = i.Position
 		startPos = frame.Position
@@ -241,11 +250,11 @@ frame.InputBegan:Connect(function(i)
 end)
 
 UIS.InputChanged:Connect(function(i)
-	if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-		local d = i.Position - dragStart
+	if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+		local delta = i.Position - dragStart
 		frame.Position = UDim2.new(
-			startPos.X.Scale,startPos.X.Offset+d.X,
-			startPos.Y.Scale,startPos.Y.Offset+d.Y
+			startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y
 		)
 	end
 end)
@@ -255,20 +264,20 @@ UIS.InputEnded:Connect(function()
 end)
 
 --------------------------------------------------
--- ICONO CIRCULAR (DRAG + CLICK SOUND)
+-- FLOATING ICON (DRAG + OPEN/CLOSE)
 --------------------------------------------------
 local icon = Instance.new("TextButton", gui)
-icon.Size = UDim2.fromScale(0.08,0.08)
+icon.Size = UDim2.fromScale(0.09,0.09)
 icon.Position = UDim2.fromScale(0.03,0.45)
 icon.Text = "O"
-icon.TextScaled = true
 icon.Font = Enum.Font.GothamBlack
-icon.BackgroundColor3 = Color3.new(0,0,0)
+icon.TextScaled = true
 icon.TextColor3 = Color3.new(1,1,1)
+icon.BackgroundColor3 = Color3.new(0,0,0)
 icon.BorderSizePixel = 0
 Instance.new("UICorner", icon).CornerRadius = UDim.new(1,0)
+icon.Active = true
 
-local open = true
 icon.MouseButton1Click:Connect(function()
 	click()
 	open = not open
@@ -276,25 +285,25 @@ icon.MouseButton1Click:Connect(function()
 end)
 
 -- DRAG ICON
-local draggingI, dragStartI, startPosI
+local dI, dStart, dPos
 icon.InputBegan:Connect(function(i)
-	if i.UserInputType == Enum.UserInputType.MouseButton1 then
-		draggingI = true
-		dragStartI = i.Position
-		startPosI = icon.Position
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		dI = true
+		dStart = i.Position
+		dPos = icon.Position
 	end
 end)
 
 UIS.InputChanged:Connect(function(i)
-	if draggingI and i.UserInputType == Enum.UserInputType.MouseMovement then
-		local d = i.Position - dragStartI
+	if dI and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+		local delta = i.Position - dStart
 		icon.Position = UDim2.new(
-			startPosI.X.Scale,startPosI.X.Offset+d.X,
-			startPosI.Y.Scale,startPosI.Y.Offset+d.Y
+			dPos.X.Scale, dPos.X.Offset + delta.X,
+			dPos.Y.Scale, dPos.Y.Offset + delta.Y
 		)
 	end
 end)
 
 UIS.InputEnded:Connect(function()
-	draggingI = false
+	dI = false
 end)

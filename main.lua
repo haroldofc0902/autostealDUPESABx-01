@@ -1,4 +1,4 @@
---// CAT HUB - LocalScript (FIX DRAG + BIG TEXT)
+--// CAT HUB - LOCAL SCRIPT FINAL
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -19,7 +19,7 @@ player.CharacterAdded:Connect(function(c)
 end)
 
 --------------------------------------------------
--- STATES
+-- ESTADOS
 --------------------------------------------------
 local speedOn = false
 local autoKick = false
@@ -37,50 +37,47 @@ local gui = Instance.new("ScreenGui", player.PlayerGui)
 gui.ResetOnSpawn = false
 
 --------------------------------------------------
--- CLICK SOUND
+-- SONIDO CLICK
 --------------------------------------------------
 local clickSound = Instance.new("Sound", gui)
 clickSound.SoundId = "rbxassetid://12221967"
 clickSound.Volume = 1
-
-local function click()
-	clickSound:Play()
-end
+local function click() clickSound:Play() end
 
 --------------------------------------------------
--- MAIN FRAME
+-- FRAME PRINCIPAL
 --------------------------------------------------
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.fromScale(0.36,0.6)
-frame.Position = UDim2.fromScale(0.32,0.2)
+frame.Size = UDim2.fromScale(0.38,0.62)
+frame.Position = UDim2.fromScale(0.31,0.2)
 frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 frame.BorderSizePixel = 0
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,18)
 frame.Active = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,18)
 
 --------------------------------------------------
--- TITLE (DRAG AREA)
+-- TITULO (DRAG)
 --------------------------------------------------
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.fromScale(1,0.12)
 title.BackgroundTransparency = 1
 title.Text = "CAT HUB"
 title.Font = Enum.Font.GothamBlack
-title.TextColor3 = Color3.fromRGB(255,90,90)
 title.TextScaled = true
+title.TextColor3 = Color3.fromRGB(255,90,90)
 title.Active = true
 
 --------------------------------------------------
--- BUTTON CREATOR (BIG TEXT)
+-- CREAR BOTONES (TEXTO GRANDE)
 --------------------------------------------------
 local function makeButton(text, posY, width)
 	local b = Instance.new("TextButton", frame)
-	b.Size = UDim2.fromScale(width or 0.9,0.085)
+	b.Size = UDim2.fromScale(width or 0.9,0.09)
 	b.Position = UDim2.fromScale(0.05,posY)
 	b.Text = text
 	b.Font = Enum.Font.GothamBold
 	b.TextScaled = true
-	b.TextSize = 24
+	b.TextSize = 28
 	b.TextColor3 = Color3.new(1,1,1)
 	b.BackgroundColor3 = Color3.fromRGB(40,40,40)
 	b.BorderSizePixel = 0
@@ -89,33 +86,36 @@ local function makeButton(text, posY, width)
 end
 
 --------------------------------------------------
--- BUTTONS (ORDER)
+-- BOTONES (ORDEN)
 --------------------------------------------------
 local teleBtn  = makeButton("TELEGUIADO",0.14)
-local speedBtn = makeButton("SPEED : OFF",0.24)
-local kickBtn  = makeButton("AUTO KICK : OFF",0.34)
+local speedBtn = makeButton("SPEED : OFF",0.25)
+local kickBtn  = makeButton("AUTO KICK : OFF",0.36)
 
-local espBtn = makeButton("ESP : OFF",0.44,0.43)
-espBtn.Position = UDim2.fromScale(0.05,0.44)
+local espBtn = makeButton("ESP : OFF",0.47,0.43)
+espBtn.Position = UDim2.fromScale(0.05,0.47)
 
-local xrayBtn = makeButton("X-RAY : OFF",0.44,0.43)
-xrayBtn.Position = UDim2.fromScale(0.52,0.44)
+local xrayBtn = makeButton("X-RAY : OFF",0.47,0.43)
+xrayBtn.Position = UDim2.fromScale(0.52,0.47)
 
-local grabBtn = makeButton("AUTO GRAB : OFF",0.56)
-
-local closeBtn = makeButton("CLOSE",0.68)
+local grabBtn = makeButton("AUTO GRAB : OFF",0.59)
+local closeBtn = makeButton("CLOSE",0.71)
 
 --------------------------------------------------
 -- TELEGUIADO
 --------------------------------------------------
-teleBtn.MouseButton1Click:Connect(function()
-	click()
+local function doTeleport()
 	hrp.CFrame = spawnCFrame
 	if autoKick then
 		task.delay(2,function()
 			player:Kick("Auto Kick Active")
 		end)
 	end
+end
+
+teleBtn.MouseButton1Click:Connect(function()
+	click()
+	doTeleport()
 end)
 
 --------------------------------------------------
@@ -138,7 +138,7 @@ kickBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- CLOSE MENU
+-- CERRAR MENU
 --------------------------------------------------
 local open = true
 closeBtn.MouseButton1Click:Connect(function()
@@ -148,15 +148,13 @@ closeBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- ESP (YOU INCLUDED)
+-- ESP (INCLUYE TU USER)
 --------------------------------------------------
-local espObjects = {}
+local espObjs = {}
 
 local function clearESP()
-	for _,v in pairs(espObjects) do
-		if v then v:Destroy() end
-	end
-	table.clear(espObjects)
+	for _,v in pairs(espObjs) do if v then v:Destroy() end end
+	table.clear(espObjs)
 end
 
 local function createESP(plr,color)
@@ -175,7 +173,7 @@ local function createESP(plr,color)
 	t.TextColor3 = color
 	t.TextStrokeTransparency = 0
 
-	table.insert(espObjects, bb)
+	table.insert(espObjs, bb)
 end
 
 espBtn.MouseButton1Click:Connect(function()
@@ -195,7 +193,7 @@ espBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- X-RAY
+-- X-RAY (NO SUELO)
 --------------------------------------------------
 xrayBtn.MouseButton1Click:Connect(function()
 	click()
@@ -212,7 +210,7 @@ xrayBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
--- AUTO GRAB
+-- AUTO GRAB (ROBAR / STEAL)
 --------------------------------------------------
 grabBtn.MouseButton1Click:Connect(function()
 	click()
@@ -224,8 +222,8 @@ RunService.Heartbeat:Connect(function()
 	if grabOn then
 		for _,v in pairs(workspace:GetDescendants()) do
 			if v:IsA("ProximityPrompt") then
-				local txt = string.lower(v.ActionText or "")
-				if txt:find("robar") or txt:find("steal") then
+				local t = string.lower(v.ActionText or "")
+				if t:find("robar") or t:find("steal") then
 					pcall(function()
 						v.HoldDuration = 0
 						v:InputHoldBegin()
@@ -237,10 +235,9 @@ RunService.Heartbeat:Connect(function()
 end)
 
 --------------------------------------------------
--- DRAG MENU (FIXED)
+-- DRAG MENU
 --------------------------------------------------
 local dragging, dragStart, startPos
-
 title.InputBegan:Connect(function(i)
 	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
 		dragging = true
@@ -251,20 +248,15 @@ end)
 
 UIS.InputChanged:Connect(function(i)
 	if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-		local delta = i.Position - dragStart
-		frame.Position = UDim2.new(
-			startPos.X.Scale, startPos.X.Offset + delta.X,
-			startPos.Y.Scale, startPos.Y.Offset + delta.Y
-		)
+		local d = i.Position - dragStart
+		frame.Position = UDim2.new(startPos.X.Scale,startPos.X.Offset+d.X,startPos.Y.Scale,startPos.Y.Offset+d.Y)
 	end
 end)
 
-UIS.InputEnded:Connect(function()
-	dragging = false
-end)
+UIS.InputEnded:Connect(function() dragging = false end)
 
 --------------------------------------------------
--- FLOATING ICON (DRAG + OPEN/CLOSE)
+-- ICONO CIRCULAR
 --------------------------------------------------
 local icon = Instance.new("TextButton", gui)
 icon.Size = UDim2.fromScale(0.09,0.09)
@@ -275,8 +267,8 @@ icon.TextScaled = true
 icon.TextColor3 = Color3.new(1,1,1)
 icon.BackgroundColor3 = Color3.new(0,0,0)
 icon.BorderSizePixel = 0
-Instance.new("UICorner", icon).CornerRadius = UDim.new(1,0)
 icon.Active = true
+Instance.new("UICorner", icon).CornerRadius = UDim.new(1,0)
 
 icon.MouseButton1Click:Connect(function()
 	click()
@@ -284,7 +276,7 @@ icon.MouseButton1Click:Connect(function()
 	frame.Visible = open
 end)
 
--- DRAG ICON
+-- DRAG ICONO
 local dI, dStart, dPos
 icon.InputBegan:Connect(function(i)
 	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
@@ -296,14 +288,48 @@ end)
 
 UIS.InputChanged:Connect(function(i)
 	if dI and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-		local delta = i.Position - dStart
-		icon.Position = UDim2.new(
-			dPos.X.Scale, dPos.X.Offset + delta.X,
-			dPos.Y.Scale, dPos.Y.Offset + delta.Y
-		)
+		local d = i.Position - dStart
+		icon.Position = UDim2.new(dPos.X.Scale,dPos.X.Offset+d.X,dPos.Y.Scale,dPos.Y.Offset+d.Y)
 	end
 end)
 
-UIS.InputEnded:Connect(function()
-	dI = false
+UIS.InputEnded:Connect(function() dI = false end)
+
+--------------------------------------------------
+-- TELEGUIADO FLOTANTE (SIEMPRE VISIBLE)
+--------------------------------------------------
+local teleFloat = Instance.new("TextButton", gui)
+teleFloat.Size = UDim2.fromScale(0.24,0.085)
+teleFloat.Position = UDim2.fromScale(0.38,0.03)
+teleFloat.Text = "TELEGUIADO"
+teleFloat.Font = Enum.Font.GothamBlack
+teleFloat.TextScaled = true
+teleFloat.TextColor3 = Color3.new(1,1,1)
+teleFloat.BackgroundColor3 = Color3.fromRGB(255,80,80)
+teleFloat.BorderSizePixel = 0
+teleFloat.Active = true
+Instance.new("UICorner", teleFloat).CornerRadius = UDim.new(0,18)
+
+teleFloat.MouseButton1Click:Connect(function()
+	click()
+	doTeleport()
 end)
+
+-- DRAG TELEGUIADO FLOTANTE
+local dT, sT, pT
+teleFloat.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		dT = true
+		sT = i.Position
+		pT = teleFloat.Position
+	end
+end)
+
+UIS.InputChanged:Connect(function(i)
+	if dT and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+		local d = i.Position - sT
+		teleFloat.Position = UDim2.new(pT.X.Scale,pT.X.Offset+d.X,pT.Y.Scale,pT.Y.Offset+d.Y)
+	end
+end)
+
+UIS.InputEnded:Connect(function() dT = false end)

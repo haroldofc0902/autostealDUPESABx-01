@@ -4,7 +4,7 @@
 local player = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
--- Guardar el punto donde reapareces
+-- Guardar spawn
 local spawnCFrame
 player.CharacterAdded:Connect(function(char)
 	task.wait(0.5)
@@ -22,12 +22,12 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "DragonHub"
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- Frame principal (apartado igual que antes)
+-- Frame principal (estilo oscuro como antes)
 local frame = Instance.new("Frame")
 frame.Parent = gui
-frame.Size = UDim2.new(0,260,0,240)
-frame.Position = UDim2.new(0.5,-130,0.4,0)
-frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
+frame.Size = UDim2.new(0,220,0,190)
+frame.Position = UDim2.new(0.5,-110,0.4,0)
+frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
@@ -35,32 +35,32 @@ frame.Draggable = true
 -- Título
 local title = Instance.new("TextLabel")
 title.Parent = frame
-title.Size = UDim2.new(1,0,0,35)
+title.Size = UDim2.new(1,0,0,30)
 title.BackgroundTransparency = 1
 title.Text = "DRAGON HUB"
-title.TextColor3 = Color3.fromRGB(255,0,0)
-title.Font = Enum.Font.GothamBlack
-title.TextSize = 22
+title.TextColor3 = Color3.fromRGB(255,80,80)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 20
 
--- Botones
+-- Botones estilo antiguo
 local function makeButton(text,y)
 	local b = Instance.new("TextButton")
 	b.Parent = frame
-	b.Size = UDim2.new(1,-20,0,32)
-	b.Position = UDim2.new(0,10,0,y)
-	b.BackgroundColor3 = Color3.fromRGB(235,235,235)
-	b.TextColor3 = Color3.fromRGB(0,0,0)
-	b.Font = Enum.Font.SourceSansBold
-	b.TextSize = 18
+	b.Size = UDim2.new(1,-16,0,28)
+	b.Position = UDim2.new(0,8,0,y)
+	b.BackgroundColor3 = Color3.fromRGB(50,50,50)
+	b.TextColor3 = Color3.fromRGB(255,255,255)
+	b.Font = Enum.Font.SourceSans
+	b.TextSize = 16
 	b.BorderSizePixel = 0
 	b.Text = text
 	return b
 end
 
-local teleBtn  = makeButton("Teleguiado",45)
-local speedBtn = makeButton("SPEED",85)
-local wallBtn  = makeButton("Wallhack",125)
-local kickBtn  = makeButton("Auto Kick",165)
+local teleBtn  = makeButton("Teleguiado",40)
+local speedBtn = makeButton("SPEED",75)
+local wallBtn  = makeButton("Wallhack",110)
+local kickBtn  = makeButton("Auto Kick",145)
 
 -- Variables
 local wallhack = false
@@ -71,7 +71,9 @@ teleBtn.MouseButton1Click:Connect(function()
 	if spawnCFrame and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
 		player.Character.HumanoidRootPart.CFrame = spawnCFrame
 		if autoKick then
-			player:Kick("You Stole a Pet!")
+			task.delay(2, function() -- 2 segundos
+				player:Kick("You Stole a Pet!")
+			end)
 		end
 	end
 end)
@@ -105,10 +107,10 @@ kickBtn.MouseButton1Click:Connect(function()
 	kickBtn.Text = autoKick and "Auto Kick (ON)" or "Auto Kick (OFF)"
 end)
 
--- Icono flotante negro, redondo
+-- Botón flotante negro, redondo
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Parent = gui
-toggleBtn.Size = UDim2.new(0,55,0,55)
+toggleBtn.Size = UDim2.new(0,45,0,45)
 toggleBtn.Position = UDim2.new(0.05,0,0.5,0)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 toggleBtn.Text = ""

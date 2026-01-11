@@ -1,127 +1,203 @@
 -- DRAGON HUB (LocalScript)
--- Poner en: StarterGui > ScreenGui > LocalScript
 
-local player = game.Players.LocalPlayer
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 
--- Guardar spawn
-local spawnCFrame
-player.CharacterAdded:Connect(function(char)
-	task.wait(0.5)
-	if char:FindFirstChild("HumanoidRootPart") then
-		spawnCFrame = char.HumanoidRootPart.CFrame
-	end
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local humanoid = char:WaitForChild("Humanoid")
+
+-- Guardar el lugar donde apareces
+local spawnCFrame = hrp.CFrame
+
+player.CharacterAdded:Connect(function(c)
+	char = c
+	hrp = c:WaitForChild("HumanoidRootPart")
+	humanoid = c:WaitForChild("Humanoid")
+	spawnCFrame = hrp.CFrame
 end)
 
-if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-	spawnCFrame = player.Character.HumanoidRootPart.CFrame
-end
+-- Estados
+local autoKick = false
+local speedOn = false
+local noclipOn = false
+
+local normalSpeed = 16
+local fastSpeed = 35
 
 -- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "DragonHub"
+gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- Frame principal (estilo oscuro como antes)
+-- FRAME PRINCIPAL
 local frame = Instance.new("Frame")
 frame.Parent = gui
-frame.Size = UDim2.new(0,220,0,190)
-frame.Position = UDim2.new(0.5,-110,0.4,0)
-frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+frame.Size = UDim2.fromScale(0.32,0.4)
+frame.Position = UDim2.fromScale(0.34,0.3)
+frame.BackgroundColor3 = Color3.fromRGB(255,255,255)
 frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,14)
 
--- Título
+-- TITULO
 local title = Instance.new("TextLabel")
 title.Parent = frame
-title.Size = UDim2.new(1,0,0,30)
+title.Size = UDim2.fromScale(1,0.12)
 title.BackgroundTransparency = 1
 title.Text = "DRAGON HUB"
-title.TextColor3 = Color3.fromRGB(255,80,80)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 20
+title.TextColor3 = Color3.fromRGB(255,0,0)
+title.Font = Enum.Font.GothamBlack
+title.TextScaled = true
+title.TextStrokeTransparency = 0
+title.TextStrokeColor3 = Color3.fromRGB(0,0,0)
 
--- Botones estilo antiguo
+-- FUNCIÓN PARA CREAR BOTONES
 local function makeButton(text,y)
 	local b = Instance.new("TextButton")
 	b.Parent = frame
-	b.Size = UDim2.new(1,-16,0,28)
-	b.Position = UDim2.new(0,8,0,y)
-	b.BackgroundColor3 = Color3.fromRGB(50,50,50)
-	b.TextColor3 = Color3.fromRGB(255,255,255)
-	b.Font = Enum.Font.SourceSans
-	b.TextSize = 16
-	b.BorderSizePixel = 0
+	b.Size = UDim2.fromScale(0.9,0.14)
+	b.Position = UDim2.fromScale(0.05,y)
 	b.Text = text
+	b.TextColor3 = Color3.new(0,0,0)
+	b.BackgroundColor3 = Color3.fromRGB(220,220,220)
+	b.BorderSizePixel = 0
+	b.Font = Enum.Font.GothamBold
+	b.TextScaled = true
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
 	return b
 end
 
-local teleBtn  = makeButton("Teleguiado",40)
-local speedBtn = makeButton("SPEED",75)
-local wallBtn  = makeButton("Wallhack",110)
-local kickBtn  = makeButton("Auto Kick",145)
+-- BOTONES
+local teleBtn  = makeButton("TELEGUIADO",0.15)
+local wallBtn  = makeButton("WALLHACK : OFF",0.33)
+local speedBtn = makeButton("SPEED : OFF",0.51)
+local kickBtn  = makeButton("AUTO KICK : OFF",0.69)
 
--- Variables
-local wallhack = false
-local autoKick = false
-
--- Teleguiado
+-- TELEGUIADO
 teleBtn.MouseButton1Click:Connect(function()
-	if spawnCFrame and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-		player.Character.HumanoidRootPart.CFrame = spawnCFrame
-		if autoKick then
-			task.delay(2, function() -- 2 segundos
-				player:Kick("You Stole a Pet!")
-			end)
-		end
+	hrp.CFrame = spawnCFrame
+	if autoKick then
+		task.wait(2) -- 2 segundos después
+		player:Kick("You Stole a Pet!")
 	end
 end)
 
 -- SPEED
 speedBtn.MouseButton1Click:Connect(function()
-	if player.Character and player.Character:FindFirstChild("Humanoid") then
-		player.Character.Humanoid.WalkSpeed = 35
+	speedOn = not speedOn
+	if speedOn then
+		humanoid.WalkSpeed = fastSpeed
+		speedBtn.Text = "SPEED : ON"
+	else
+		humanoid.WalkSpeed = normalSpeed
+		speedBtn.Text = "SPEED : OFF"
 	end
 end)
 
--- Wallhack
+-- WALLHACK (Noclip)
+local noclipConn
 wallBtn.MouseButton1Click:Connect(function()
-	wallhack = not wallhack
-	wallBtn.Text = wallhack and "Wallhack (ON)" or "Wallhack (OFF)"
-end)
-
-RunService.Stepped:Connect(function()
-	if wallhack and player.Character then
-		for _,v in pairs(player.Character:GetDescendants()) do
+	noclipOn = not noclipOn
+	if noclipOn then
+		wallBtn.Text = "WALLHACK : ON"
+		noclipConn = RunService.Stepped:Connect(function()
+			for _,v in pairs(char:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.CanCollide = false
+				end
+			end
+		end)
+	else
+		wallBtn.Text = "WALLHACK : OFF"
+		if noclipConn then
+			noclipConn:Disconnect()
+			noclipConn = nil
+		end
+		for _,v in pairs(char:GetDescendants()) do
 			if v:IsA("BasePart") then
-				v.CanCollide = false
+				v.CanCollide = true
 			end
 		end
 	end
 end)
 
--- Auto Kick
+-- AUTO KICK
 kickBtn.MouseButton1Click:Connect(function()
 	autoKick = not autoKick
-	kickBtn.Text = autoKick and "Auto Kick (ON)" or "Auto Kick (OFF)"
+	if autoKick then
+		kickBtn.Text = "AUTO KICK : ON"
+	else
+		kickBtn.Text = "AUTO KICK : OFF"
+	end
 end)
 
--- Botón flotante negro, redondo
-local toggleBtn = Instance.new("TextButton")
+-- DRAG DEL MENÚ
+local dragging, dragStart, startPos
+frame.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = i.Position
+		startPos = frame.Position
+	end
+end)
+
+frame.InputEnded:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(i)
+	if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+		local delta = i.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- BOTÓN FLOTANTE CIRCULAR
+local toggleBtn = Instance.new("ImageButton")
 toggleBtn.Parent = gui
-toggleBtn.Size = UDim2.new(0,45,0,45)
-toggleBtn.Position = UDim2.new(0.05,0,0.5,0)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
-toggleBtn.Text = ""
+toggleBtn.Size = UDim2.fromScale(0.08,0.08)
+toggleBtn.Position = UDim2.fromScale(0.03,0.45)
+toggleBtn.Image = "rbxassetid://73387282416078"
+toggleBtn.BackgroundTransparency = 1
 toggleBtn.BorderSizePixel = 0
-toggleBtn.Active = true
-toggleBtn.Draggable = true
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1,0)
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(1,0)
-corner.Parent = toggleBtn
-
+local open = true
 toggleBtn.MouseButton1Click:Connect(function()
-	frame.Visible = not frame.Visible
+	open = not open
+	frame.Visible = open
+end)
+
+-- DRAG DEL CÍRCULO
+local draggingC, dragStartC, startPosC
+toggleBtn.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		draggingC = true
+		dragStartC = i.Position
+		startPosC = toggleBtn.Position
+	end
+end)
+
+toggleBtn.InputEnded:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		draggingC = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(i)
+	if draggingC and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+		local delta = i.Position - dragStartC
+		toggleBtn.Position = UDim2.new(
+			startPosC.X.Scale, startPosC.X.Offset + delta.X,
+			startPosC.Y.Scale, startPosC.Y.Offset + delta.Y
+		)
+	end
 end)

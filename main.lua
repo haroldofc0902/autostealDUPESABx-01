@@ -9,7 +9,7 @@ local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
 local humanoid = char:WaitForChild("Humanoid")
 
--- Guardar spawn
+-- Spawn
 local spawnCFrame = hrp.CFrame
 player.CharacterAdded:Connect(function(c)
 	char = c
@@ -21,6 +21,10 @@ end)
 -- Estados
 local speedOn = false
 local autoKick = false
+local espOn = false
+local xrayOn = false
+local menuOpen = true
+
 local normalSpeed = 16
 local fastSpeed = 35
 
@@ -30,46 +34,39 @@ gui.Name = "DragonHub"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- Frame principal
+-- Frame
 local frame = Instance.new("Frame")
 frame.Parent = gui
-frame.Size = UDim2.fromScale(0.3,0.45)
-frame.Position = UDim2.fromScale(0.35,0.28)
+frame.Size = UDim2.fromScale(0.32,0.55)
+frame.Position = UDim2.fromScale(0.34,0.25)
 frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 frame.BorderSizePixel = 0
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0,18)
 
--- Barra superior
-local topBar = Instance.new("Frame")
-topBar.Parent = frame
-topBar.Size = UDim2.fromScale(1,0.13)
+-- Top bar
+local topBar = Instance.new("Frame", frame)
+topBar.Size = UDim2.fromScale(1,0.12)
 topBar.BackgroundColor3 = Color3.fromRGB(240,240,240)
 topBar.BorderSizePixel = 0
 Instance.new("UICorner", topBar).CornerRadius = UDim.new(0,18)
 
-local title = Instance.new("TextLabel")
-title.Parent = topBar
-title.Size = UDim2.fromScale(0.9,1)
-title.Position = UDim2.fromScale(0.05,0)
+local title = Instance.new("TextLabel", topBar)
+title.Size = UDim2.fromScale(1,1)
 title.BackgroundTransparency = 1
 title.Text = "DRAGON HUB"
-title.TextColor3 = Color3.fromRGB(30,30,30)
 title.Font = Enum.Font.GothamBold
 title.TextScaled = true
+title.TextColor3 = Color3.fromRGB(30,30,30)
 
 -- Sonido click
-local clickSound = Instance.new("Sound")
-clickSound.SoundId = "rbxassetid://12221967" -- click limpio
+local clickSound = Instance.new("Sound", gui)
+clickSound.SoundId = "rbxassetid://12221967"
 clickSound.Volume = 0.8
-clickSound.Parent = gui
-
-local function playClick()
-	clickSound:Play()
-end
+local function click() clickSound:Play() end
 
 -- Animaciones
 local openPos = frame.Position
-local closedPos = UDim2.fromScale(openPos.X.Scale, 1.2)
+local closedPos = UDim2.fromScale(openPos.X.Scale, 1.3)
 
 local tweenIn = TweenService:Create(
 	frame,
@@ -83,110 +80,77 @@ local tweenOut = TweenService:Create(
 	{Position = closedPos}
 )
 
--- Función botones
-local function makeButton(text,y)
-	local b = Instance.new("TextButton")
-	b.Parent = frame
-	b.Size = UDim2.fromScale(0.9,0.13)
-	b.Position = UDim2.fromScale(0.05,y)
+-- FUNCIÓN ÚNICA PARA ABRIR / CERRAR
+local function toggleMenu()
+	click()
+	menuOpen = not menuOpen
+	if menuOpen then
+		frame.Visible = true
+		frame.Position = closedPos
+		tweenIn:Play()
+	else
+		tweenOut:Play()
+	end
+end
+
+-- Botones
+local function makeButton(text,y,w,x)
+	local b = Instance.new("TextButton", frame)
+	b.Size = w or UDim2.fromScale(0.9,0.11)
+	b.Position = UDim2.fromScale(x or 0.05,y)
 	b.Text = text
+	b.Font = Enum.Font.GothamBold
+	b.TextScaled = true
 	b.TextColor3 = Color3.fromRGB(230,230,230)
 	b.BackgroundColor3 = Color3.fromRGB(40,40,40)
 	b.BorderSizePixel = 0
-	b.Font = Enum.Font.GothamBold
-	b.TextScaled = true
 	Instance.new("UICorner", b).CornerRadius = UDim.new(0,14)
 	return b
 end
 
--- Botones
-local teleBtn  = makeButton("TP TO BASE",0.20)
-local speedBtn = makeButton("SPEED (OFF)",0.36)
-local kickBtn  = makeButton("AUTO KICK (OFF)",0.52)
-local closeBtn = makeButton("CLOSE MENU",0.68)
+local teleBtn  = makeButton("TP TO BASE",0.15)
+local speedBtn = makeButton("SPEED (OFF)",0.28)
+local kickBtn  = makeButton("AUTO KICK (OFF)",0.41)
+local closeBtn = makeButton("CLOSE MENU",0.54)
 
--- Teleguiado
+local espBtn  = makeButton("ESP (OFF)",0.70,UDim2.fromScale(0.42,0.11),0.05)
+local xrayBtn = makeButton("X-RAY (OFF)",0.70,UDim2.fromScale(0.42,0.11),0.53)
+
+-- FUNCIONES
+
 teleBtn.MouseButton1Click:Connect(function()
-	playClick()
+	click()
 	hrp.CFrame = spawnCFrame
 	if autoKick then
 		task.wait(2)
-		player:Kick("You Stole a Pet!")
+		player:Kick("Auto Kick Active")
 	end
 end)
 
--- Velocidad
 speedBtn.MouseButton1Click:Connect(function()
-	playClick()
+	click()
 	speedOn = not speedOn
-	if speedOn then
-		humanoid.WalkSpeed = fastSpeed
-		speedBtn.Text = "SPEED (ON)"
-		speedBtn.BackgroundColor3 = Color3.fromRGB(90,50,50)
-	else
-		humanoid.WalkSpeed = normalSpeed
-		speedBtn.Text = "SPEED (OFF)"
-		speedBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	end
+	humanoid.WalkSpeed = speedOn and fastSpeed or normalSpeed
+	speedBtn.Text = speedOn and "SPEED (ON)" or "SPEED (OFF)"
+	speedBtn.BackgroundColor3 = speedOn and Color3.fromRGB(90,50,50) or Color3.fromRGB(40,40,40)
 end)
 
--- Auto Kick
 kickBtn.MouseButton1Click:Connect(function()
-	playClick()
+	click()
 	autoKick = not autoKick
-	if autoKick then
-		kickBtn.Text = "AUTO KICK (ON)"
-		kickBtn.BackgroundColor3 = Color3.fromRGB(90,50,50)
-	else
-		kickBtn.Text = "AUTO KICK (OFF)"
-		kickBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	end
+	kickBtn.Text = autoKick and "AUTO KICK (ON)" or "AUTO KICK (OFF)"
+	kickBtn.BackgroundColor3 = autoKick and Color3.fromRGB(90,50,50) or Color3.fromRGB(40,40,40)
 end)
 
--- Cerrar menú (animado)
-closeBtn.MouseButton1Click:Connect(function()
-	playClick()
-	tweenOut:Play()
-end)
+-- CLOSE MENU
+closeBtn.MouseButton1Click:Connect(toggleMenu)
 
--- Botón flotante
-local toggleBtn = Instance.new("ImageButton")
-toggleBtn.Parent = gui
+-- ICONO FLOTANTE
+local toggleBtn = Instance.new("ImageButton", gui)
 toggleBtn.Size = UDim2.fromScale(0.08,0.08)
 toggleBtn.Position = UDim2.fromScale(0.03,0.45)
 toggleBtn.BackgroundColor3 = Color3.new(0,0,0)
 toggleBtn.BorderSizePixel = 0
 Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1,0)
 
-toggleBtn.MouseButton1Click:Connect(function()
-	playClick()
-	frame.Visible = true
-	frame.Position = closedPos
-	tweenIn:Play()
-end)
-
--- Drag menú
-local dragging, dragStart, startPos
-frame.InputBegan:Connect(function(i)
-	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = i.Position
-		startPos = frame.Position
-	end
-end)
-
-frame.InputEnded:Connect(function(i)
-	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-		dragging = false
-	end
-end)
-
-UIS.InputChanged:Connect(function(i)
-	if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-		local delta = i.Position - dragStart
-		frame.Position = UDim2.new(
-			startPos.X.Scale, startPos.X.Offset + delta.X,
-			startPos.Y.Scale, startPos.Y.Offset + delta.Y
-		)
-	end
-end)
+toggleBtn.MouseButton1Click:Connect(toggleMenu)

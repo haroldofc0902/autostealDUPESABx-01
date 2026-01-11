@@ -80,7 +80,7 @@ local kickBtn  = makeButton("AUTO KICK : OFF",0.69)
 teleBtn.MouseButton1Click:Connect(function()
 	hrp.CFrame = spawnCFrame
 	if autoKick then
-		task.wait(2) -- 2 segundos después
+		task.wait(2)
 		player:Kick("You Stole a Pet!")
 	end
 end)
@@ -97,7 +97,7 @@ speedBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- WALLHACK (Noclip)
+-- WALLHACK
 local noclipConn
 wallBtn.MouseButton1Click:Connect(function()
 	noclipOn = not noclipOn
@@ -160,13 +160,13 @@ UIS.InputChanged:Connect(function(i)
 	end
 end)
 
--- BOTÓN FLOTANTE CIRCULAR
+-- BOTÓN FLOTANTE NEGRO CIRCULAR
 local toggleBtn = Instance.new("ImageButton")
 toggleBtn.Parent = gui
 toggleBtn.Size = UDim2.fromScale(0.08,0.08)
 toggleBtn.Position = UDim2.fromScale(0.03,0.45)
-toggleBtn.Image = "rbxassetid://73387282416078"
-toggleBtn.BackgroundTransparency = 1
+toggleBtn.BackgroundColor3 = Color3.new(0,0,0) -- negro
+toggleBtn.BackgroundTransparency = 0
 toggleBtn.BorderSizePixel = 0
 Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(1,0)
 
@@ -176,7 +176,7 @@ toggleBtn.MouseButton1Click:Connect(function()
 	frame.Visible = open
 end)
 
--- DRAG DEL CÍRCULO
+-- DRAG DEL CÍRCULO NEGRO
 local draggingC, dragStartC, startPosC
 toggleBtn.InputBegan:Connect(function(i)
 	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then

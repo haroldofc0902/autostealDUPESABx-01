@@ -99,11 +99,9 @@ task.wait(0.7)
 LoadingGui:Destroy()
 
 -------------------------------------------------
--- VARIABLES GOD MODE
+-- VARIABLES
 -------------------------------------------------
 local godModeEnabled = false
-local humanoid
-local maxHealth = 100
 
 -------------------------------------------------
 -- UI HUB
@@ -177,30 +175,24 @@ DiscordLink.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------
--- GOD MODE REAL (TSUNAMI FIX)
+-- IGNORAR WAVES (REEMPLAZA GOD MODE)
 -------------------------------------------------
-local connections = {}
-
-local function enableGod()
-	local character = player.Character or player.CharacterAdded:Wait()
-	humanoid = character:WaitForChild("Humanoid")
-
-	humanoid.BreakJointsOnDeath = false
-
-	table.insert(connections,
-		humanoid.HealthChanged:Connect(function(hp)
-			if hp < 5 then
-				humanoid.Health = humanoid.MaxHealth
-			end
-		end)
-	)
+local function aplicarAntiTouch(character)
+	for _,part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanTouch = false
+			part.CanQuery = false
+		end
+	end
 end
 
-local function disableGod()
-	for _,c in pairs(connections) do
-		c:Disconnect()
+local function quitarAntiTouch(character)
+	for _,part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanTouch = true
+			part.CanQuery = true
+		end
 	end
-	connections = {}
 end
 
 GodModeButton.MouseButton1Click:Connect(function()
@@ -210,21 +202,25 @@ GodModeButton.MouseButton1Click:Connect(function()
 		GodModeButton.Text = "ON"
 		GodModeButton.TextColor3 = Color3.fromRGB(0,255,0)
 		GodModeButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
-		enableGod()
+		if player.Character then
+			aplicarAntiTouch(player.Character)
+		end
 	else
 		GodModeButton.Text = "GOD MODE"
 		GodModeButton.TextColor3 = Color3.fromRGB(255,255,255)
 		GodModeButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
-		disableGod()
+		if player.Character then
+			quitarAntiTouch(player.Character)
+		end
 	end
 end)
 
 -------------------------------------------------
--- REAPLICAR GOD MODE AL MORIR
+-- REAPLICAR AL MORIR
 -------------------------------------------------
 player.CharacterAdded:Connect(function(char)
 	if godModeEnabled then
-		task.wait(1)
-		enableGod()
+		task.wait(0.3)
+		aplicarAntiTouch(char)
 	end
 end)

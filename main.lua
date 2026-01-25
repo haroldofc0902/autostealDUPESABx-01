@@ -26,14 +26,12 @@ LoadingGui.ResetOnSpawn = false
 LoadingGui.IgnoreGuiInset = true
 LoadingGui.Parent = PlayerGui
 
--- Fondo
 local Background = Instance.new("Frame")
 Background.Parent = LoadingGui
 Background.Size = UDim2.new(1,0,1,0)
 Background.BackgroundColor3 = Color3.fromRGB(0,0,0)
 Background.BackgroundTransparency = 1
 
--- Texto
 local Title = Instance.new("TextLabel")
 Title.Parent = Background
 Title.Size = UDim2.new(1,0,0,60)
@@ -45,7 +43,6 @@ Title.Font = Enum.Font.GothamBold
 Title.TextSize = 32
 Title.TextTransparency = 1
 
--- Barra fondo
 local BarBack = Instance.new("Frame")
 BarBack.Parent = Background
 BarBack.Size = UDim2.new(0.4,0,0,18)
@@ -55,7 +52,6 @@ BarBack.BackgroundTransparency = 1
 BarBack.BorderSizePixel = 0
 Instance.new("UICorner", BarBack).CornerRadius = UDim.new(0,10)
 
--- Barra verde
 local Bar = Instance.new("Frame")
 Bar.Parent = BarBack
 Bar.Size = UDim2.new(0,0,1,0)
@@ -63,7 +59,6 @@ Bar.BackgroundColor3 = Color3.fromRGB(0,255,0)
 Bar.BorderSizePixel = 0
 Instance.new("UICorner", Bar).CornerRadius = UDim.new(0,10)
 
--- Avatar
 local Avatar = Instance.new("ImageLabel")
 Avatar.Parent = Background
 Avatar.Size = UDim2.new(0,80,0,80)
@@ -78,7 +73,6 @@ local avatarUrl = Players:GetUserThumbnailAsync(
 )
 Avatar.Image = avatarUrl
 
--- Animaciones
 TweenService:Create(Background, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
 TweenService:Create(Title, TweenInfo.new(0.6), {TextTransparency = 0}):Play()
 TweenService:Create(BarBack, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
@@ -110,7 +104,6 @@ LoadingGui:Destroy()
 local godModeEnabled = false
 local humanoid
 local maxHealth = 100
-local godConnection
 
 -------------------------------------------------
 -- UI HUB
@@ -132,7 +125,6 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,12)
 
--- Título
 local CreatorLabel = Instance.new("TextLabel")
 CreatorLabel.Parent = MainFrame
 CreatorLabel.Size = UDim2.new(1,0,0,25)
@@ -143,7 +135,6 @@ CreatorLabel.TextColor3 = Color3.fromRGB(255,255,255)
 CreatorLabel.Font = Enum.Font.GothamBold
 CreatorLabel.TextSize = 14
 
--- Botón God Mode
 local GodModeButton = Instance.new("TextButton")
 GodModeButton.Parent = MainFrame
 GodModeButton.Size = UDim2.new(0.9,0,0,45)
@@ -156,7 +147,6 @@ GodModeButton.TextSize = 18
 GodModeButton.BorderSizePixel = 0
 Instance.new("UICorner", GodModeButton).CornerRadius = UDim.new(0,10)
 
--- Texto Discord
 local DiscordLabel = Instance.new("TextLabel")
 DiscordLabel.Parent = MainFrame
 DiscordLabel.Size = UDim2.new(0,55,0,15)
@@ -187,8 +177,42 @@ DiscordLink.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------
--- GOD MODE REAL
+-- GOD MODE REAL (TSUNAMI FIX)
 -------------------------------------------------
+local connections = {}
+
+local function enableGod()
+	local character = player.Character or player.CharacterAdded:Wait()
+	humanoid = character:WaitForChild("Humanoid")
+
+	humanoid.MaxHealth = math.huge
+	humanoid.Health = math.huge
+	humanoid.BreakJointsOnDeath = false
+
+	table.insert(connections,
+		humanoid.HealthChanged:Connect(function()
+			humanoid.Health = humanoid.MaxHealth
+		end)
+	)
+
+	table.insert(connections,
+		humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+			humanoid.Health = humanoid.MaxHealth
+		end)
+	)
+end
+
+local function disableGod()
+	for _,c in pairs(connections) do
+		c:Disconnect()
+	end
+	connections = {}
+
+	if humanoid then
+		humanoid.MaxHealth = 100
+	end
+end
+
 GodModeButton.MouseButton1Click:Connect(function()
 	godModeEnabled = not godModeEnabled
 
@@ -196,27 +220,12 @@ GodModeButton.MouseButton1Click:Connect(function()
 		GodModeButton.Text = "ON"
 		GodModeButton.TextColor3 = Color3.fromRGB(0,255,0)
 		GodModeButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
-
-		local character = player.Character or player.CharacterAdded:Wait()
-		humanoid = character:WaitForChild("Humanoid")
-		maxHealth = humanoid.MaxHealth
-		humanoid.Health = maxHealth
-
-		godConnection = RunService.Heartbeat:Connect(function()
-			if humanoid and humanoid.Health < maxHealth then
-				humanoid.Health = maxHealth
-			end
-		end)
-
+		enableGod()
 	else
 		GodModeButton.Text = "GOD MODE"
 		GodModeButton.TextColor3 = Color3.fromRGB(255,255,255)
 		GodModeButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
-
-		if godConnection then
-			godConnection:Disconnect()
-			godConnection = nil
-		end
+		disableGod()
 	end
 end)
 
@@ -226,18 +235,6 @@ end)
 player.CharacterAdded:Connect(function(char)
 	if godModeEnabled then
 		task.wait(1)
-		humanoid = char:WaitForChild("Humanoid")
-		maxHealth = humanoid.MaxHealth
-		humanoid.Health = maxHealth
-
-		if godConnection then
-			godConnection:Disconnect()
-		end
-
-		godConnection = RunService.Heartbeat:Connect(function()
-			if humanoid and humanoid.Health < maxHealth then
-				humanoid.Health = maxHealth
-			end
-		end)
+		enableGod()
 	end
 end)
